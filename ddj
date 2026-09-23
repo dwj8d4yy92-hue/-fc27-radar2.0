@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>FC27 Trading Radar</title>
+
+  <meta name="theme-color" content="#080b14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #080b14;
+      color: #ffffff;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+
+    .logo {
+      font-size: 42px;
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: #8f99ad;
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    .scan-button {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 20px 0;
+      background: linear-gradient(135deg, #20d66b, #16a34a);
+      color: #031008;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(32, 214, 107, 0.18);
+    }
+
+    .scan-button:active {
+      transform: scale(0.98);
+    }
+
+    .status {
+      text-align: center;
+      color: #8f99ad;
+      margin-bottom: 15px;
+      min-height: 20px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .metric {
+      background: #121725;
+      border: 1px solid #20283a;
+      border-radius: 15px;
+      padding: 16px;
+    }
+
+    .metric-title {
+      color: #8f99ad;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .card {
+      background: #121725;
+      border: 1px solid #20283a;
+      border-radius: 17px;
+      padding: 17px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    h2 {
+      margin: 0 0 15px;
+      font-size: 19px;
+    }
+
+    .empty {
+      color: #8f99ad;
+      padding: 15px 0;
+      text-align: center;
+    }
+
+    .mover {
+      background: #0c111e;
+      border: 1px solid #20283a;
+      border-radius: 13px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .mover:last-child {
+      margin-bottom: 0;
+    }
+
+    .mover-name {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 9px;
+    }
+
+    .mover-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .data {
+      background: #151c2c;
+      border-radius: 9px;
+      padding: 9px;
+    }
+
+    .data-label {
+      color: #7f899d;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .data-value {
+      font-weight: 700;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .positive {
+      color: #20d66b;
+    }
+
+    .negative {
+      color: #ff5c6c;
+    }
+
+    .neutral {
+      color: #ffd166;
+    }
+
+    .raw-toggle {
+      background: #1a2131;
+      color: #ffffff;
+      border: 1px solid #29344a;
+      border-radius: 11px;
+      padding: 11px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    pre {
+      display: none;
+      margin-top: 12px;
+      background: #080b14;
+      border-radius: 10px;
+      padding: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #9ca8bc;
+      font-size: 11px;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+
+    .warning {
+      background: rgba(255, 193, 7, 0.08);
+      border: 1px solid rgba(255, 193, 7, 0.25);
+      color: #ffd166;
+      padding: 13px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      text-align: center;
+      color: #59647a;
+      font-size: 11px;
+      padding: 25px 0;
+    }
+
+    @media (min-width: 700px) {
+      .dashboard {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .mover-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="logo">⚽</div>
+    <h1>FC27 TRADING RADAR</h1>
+    <div class="subtitle">
+      Surveillance du marché FUTBIN
+    </div>
+  </div>
+
+  <button class="scan-button" onclick="launchRadar()">
+    🚨 LANCER LE RADAR
+  </button>
+
+  <div id="status" class="status">
+    Prêt à scanner.
+  </div>
+
+  <div class="dashboard">
+
+    <div class="metric">
+      <div class="metric-title">TOP MOVERS</div>
+      <div id="moverCount" class="metric-value">—</div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-title">DERNIER SCAN</div>
+      <div id="scanTime" class="metric-value">—</div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-title">SOURCE</div>
+      <div class="metric-value">FUTBIN</div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-title">STATUT</div>
+      <div id="connection" class="metric-value">⚪</div>
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>🔥 Top Movers</h2>
+
+    <div id="results" class="empty">
+      Lance le radar pour récupérer les mouvements du marché.
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>📊 Données brutes</h2>
+
+    <button class="raw-toggle" onclick="toggleRaw()">
+      Afficher / masquer les données API
+    </button>
+
+    <pre id="raw"></pre>
+
+  </div>
+
+  <div class="warning">
+    ⚠️ Le radar analyse uniquement les données retournées par l'API.
+    Il ne se connecte pas à ton compte EA et n'effectue aucun achat ou vente automatique.
+  </div>
+
+  <div class="footer">
+    FC27 Trading Radar — FUTBIN market data
+  </div>
+
+</div>
+
+
+<script>
+
+const API_URL =
+"https://api.parse.bot/scraper/21963078-8a17-40ff-a896-9b0b0ec3e828/get_market_trends";
+
+
+/*
+  Recherche toutes les listes contenant "mover"
+  dans la réponse de l'API.
+*/
+
+function findMovers(object) {
+
+  let results = [];
+
+  function search(value) {
+
+    if (Array.isArray(value)) {
+
+      value.forEach(item => {
+        search(item);
+      });
+
+      return;
+    }
+
+    if (value && typeof value === "object") {
+
+      Object.entries(value).forEach(([key, child]) => {
+
+        const keyName = key.toLowerCase();
+
+        if (
+          keyName.includes("mover") &&
+          Array.isArray(child)
+        ) {
+
+          results.push(...child);
+
+        }
+
+        search(child);
+
+      });
+
+    }
+
+  }
+
+  search(object);
+
+  return results;
+}
+
+
+/*
+  Évite l'injection HTML lors de l'affichage
+  des données provenant de l'API.
+*/
+
+function escapeHTML(value) {
+
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/*
+  Donne une couleur approximative aux variations.
+*/
+
+function variationClass(value) {
+
+  const number = parseFloat(
+    String(value).replace("%", "").replace(",", ".")
+  );
+
+  if (isNaN(number)) {
+    return "neutral";
+  }
+
+  if (number > 0) {
+    return "positive";
+  }
+
+  if (number < 0) {
+    return "negative";
+  }
+
+  return "neutral";
+
+}
+
+
+/*
+  Essaie de trouver le nom du joueur dans différents
+  formats possibles de la réponse FUTBIN.
+*/
+
+function getPlayerName(player) {
+
+  const possibleNames = [
+    "name",
+    "player_name",
+    "playerName",
+    "full_name",
+    "player"
+  ];
+
+  for (const key of possibleNames) {
+
+    if (
+      player[key] !== undefined &&
+      player[key] !== null &&
+      typeof player[key] !== "object"
+    ) {
+
+      return player[key];
+
+    }
+
+  }
+
+  return "Joueur";
+
+}
+
+
+/*
+  Affichage des Top Movers.
+*/
+
+function displayMovers(movers) {
+
+  const container =
+    document.getElementById("results");
+
+  if (!movers.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        Aucun Top Mover n'est actuellement retourné par FUTBIN.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  let html = "";
+
+  movers.forEach((player, index) => {
+
+    const name = getPlayerName(player);
+
+    const entries =
+      Object.entries(player)
+      .filter(([key, value]) =>
+        value !== null &&
+        value !== undefined &&
+        typeof value !== "object"
+      )
+      .slice(0, 8);
+
+    html += `
+      <div class="mover">
+
+        <div class="mover-name">
+          #${index + 1} — ${escapeHTML(name)}
+        </div>
+
+        <div class="mover-grid">
+    `;
+
+    entries.forEach(([key, value]) => {
+
+      let cls = "";
+
+      if (
+        key.toLowerCase().includes("change") ||
+        key.toLowerCase().includes("trend") ||
+        key.toLowerCase().includes("variation")
+      ) {
+
+        cls = variationClass(value);
+
+      }
+
+      html += `
+        <div class="data">
+
+          <div class="data-label">
+            ${escapeHTML(key)}
+          </div>
+
+          <div class="data-value ${cls}">
+            ${escapeHTML(value)}
+          </div>
+
+        </div>
+      `;
+
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+
+  });
+
+  container.innerHTML = html;
+
+}
+
+
+/*
+  Lance le scan.
+*/
+
+async function launchRadar() {
+
+  const status =
+    document.getElementById("status");
+
+  const connection =
+    document.getElementById("connection");
+
+  const results =
+    document.getElementById("results");
+
+  status.textContent =
+    "⏳ Connexion aux données FUTBIN...";
+
+  connection.textContent = "🟡";
+
+  results.innerHTML = `
+    <div class="empty">
+      Analyse du marché...
+    </div>
+  `;
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Erreur HTTP " + response.status
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    const movers =
+      findMovers(data);
+
+    document.getElementById("moverCount")
+      .textContent = movers.length;
+
+    document.getElementById("scanTime")
+      .textContent =
+      new Date().toLocaleTimeString(
+        "fr-FR",
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+
+    connection.textContent = "🟢";
+
+    status.textContent =
+      "✅ Radar actualisé.";
+
+    displayMovers(movers);
+
+    document.getElementById("raw")
+      .textContent =
+      JSON.stringify(data, null, 2);
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    connection.textContent = "🔴";
+
+    status.innerHTML =
+      "❌ Impossible de récupérer les données.";
+
+    results.innerHTML = `
+      <div class="warning">
+
+        <strong>Connexion bloquée.</strong><br><br>
+
+        Safari peut bloquer l'appel direct à l'API
+        si celle-ci n'autorise pas les requêtes
+        depuis GitHub Pages (CORS).
+
+        <br><br>
+
+        Si cela arrive, il faudra mettre en place
+        un petit relais serveur entre le radar et FUTBIN.
+
+        <br><br>
+
+        Erreur : ${escapeHTML(error.message)}
+
+      </div>
+    `;
+
+  }
+
+}
+
+
+/*
+  Affiche / cache les données brutes.
+*/
+
+function toggleRaw() {
+
+  const raw =
+    document.getElementById("raw");
+
+  if (raw.style.display === "block") {
+
+    raw.style.display = "none";
+
+  } else {
+
+    raw.style.display = "block";
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
